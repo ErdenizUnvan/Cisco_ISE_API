@@ -1,0 +1,96 @@
+enable
+configure terminal
+
+hostname R1
+no ip domain lookup
+
+clock timezone IST 3 0
+
+interface Ethernet0/0
+ ip address 192.168.10.1 255.255.255.0
+ no shutdown
+exit
+
+interface Ethernet0/1
+ ip address 192.168.23.11 255.255.255.0
+ ntp broadcast
+ no shutdown
+exit
+
+interface range Ethernet0/2 - 3, Ethernet1/0 - 3
+ shutdown
+exit
+
+ip route 0.0.0.0 0.0.0.0 192.168.23.2
+
+router eigrp 100
+ no auto-summary
+ network 192.168.10.0
+ network 192.168.23.0
+ redistribute static
+exit
+
+ip dhcp excluded-address 192.168.23.1 192.168.23.100
+ip dhcp excluded-address 192.168.10.1 192.168.10.100
+ip dhcp excluded-address 192.168.20.1 192.168.20.100
+ip dhcp excluded-address 192.168.30.1 192.168.30.100
+
+ip dhcp pool VLAN123
+ network 192.168.23.0 255.255.255.0
+ default-router 192.168.23.2
+ dns-server 8.8.8.8
+ option 43 ip 192.168.23.50
+exit
+
+ip dhcp pool VLAN10
+ network 192.168.10.0 255.255.255.0
+ default-router 192.168.10.1
+exit
+
+ip dhcp pool VLAN20
+ network 192.168.20.0 255.255.255.0
+ default-router 192.168.20.2
+exit
+
+ip dhcp pool VLAN30
+ network 192.168.30.0 255.255.255.0
+ default-router 192.168.30.3
+exit
+
+username admin privilege 15 secret admin
+enable secret cisco
+
+ip domain name lab.local
+
+aaa new-model
+
+radius server ISE
+ address ipv4 192.168.23.35 auth-port 1812 acct-port 1813
+ key cisco123
+exit
+
+aaa group server radius ISE-GROUP
+ server name ISE
+exit
+
+aaa authentication login default group ISE-GROUP local
+aaa authorization exec default group ISE-GROUP local if-authenticated
+
+crypto key generate rsa modulus 2048
+ip ssh version 2
+
+line con 0
+ logging synchronous
+exit
+
+line vty 0 4
+ privilege level 15
+ transport input ssh
+ login authentication default
+exit
+
+ntp source Ethernet0/1
+ntp server 192.168.23.2
+
+end
+write memory

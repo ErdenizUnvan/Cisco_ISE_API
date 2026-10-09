@@ -1,0 +1,73 @@
+login: setup
+
+Hostname              : ise
+IP Address            : 192.168.23.35
+Netmask               : 255.255.255.0
+Default Gateway       : 192.168.23.2
+IPv6                  : N
+DNS Domain            : lab.local
+Primary Nameserver    : 8.8.8.8
+Secondary Nameserver  : N
+NTP Server            : 192.168.23.2
+Another NTP           : N
+Timezone              : Europe/Istanbul
+SSH                   : Y
+Username              : admin
+Password              : Passw0rd1!
+
+ISE
+
+ISE tarafında çalışan network ayarımız:
+
+interface GigabitEthernet 0
+ ip address 192.168.23.35 255.255.255.0
+exit
+
+ip default-gateway 192.168.23.2
+ntp server 192.168.23.2
+ip domain-name lab.local
+ip name-server 8.8.8.8
+
+show application status ise
+
+kapali ise
+
+application start ise
+
+
+ISE GUI tarafında da:
+Administrain/Network Devices
+
+Name: SW1
+IP Address: 192.168.23.15/32
+RADIUS Shared Secret: cisco123
+
+ve:
+Administration > Identity Management > Identities/Network Access User
+
+Username: testuser
+Password: Cisco123!
+Status: Enabled
+Password Type: Internal Users
+Password Lifetime: Never Expires
+
+Şu anda doğruladığımız çalışan test:
+
+Switch#test aaa group ISE-GROUP testuser Cisco123! legacy
+Attempting authentication test to server-group ISE-GROUP using radius
+User was successfully authenticated.
+
+Windows'tan da:
+
+ssh testuser@192.168.23.15
+
+ile:
+
+Switch>
+
+seviyesine kadar başarılı giriş yapıyoruz.
+
+
+Administration > System > Settings > API Settings > API Service Settings 
+sayfasına gidip ERS (Read/Write) ve OpenAPI (Read/Write) seçeneğini açmalısınız
+

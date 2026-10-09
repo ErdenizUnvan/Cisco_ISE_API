@@ -1,0 +1,46 @@
+enable
+configure terminal
+
+hostname ASA
+
+interface GigabitEthernet0/0
+ nameif outside
+ security-level 0
+ ip address 192.1.20.10 255.255.255.0
+ no shutdown
+exit
+
+interface GigabitEthernet0/1
+ nameif inside
+ security-level 100
+ ip address 192.168.23.10 255.255.255.0
+ no shutdown
+exit
+
+route outside 0.0.0.0 0.0.0.0 192.1.20.4 1
+
+route inside 192.168.10.0 255.255.255.0 192.168.23.11 1
+route inside 192.168.20.0 255.255.255.0 192.168.23.11 1
+route inside 192.168.30.0 255.255.255.0 192.168.23.11 1
+
+object network INS-NET
+ subnet 192.168.0.0 255.255.0.0
+ nat (inside,outside) dynamic interface
+exit
+
+router eigrp 100
+ network 192.168.23.0 255.255.255.0
+ redistribute static
+exit
+
+policy-map global_policy
+ class inspection_default
+  inspect icmp
+  inspect icmp error
+ exit
+exit
+
+service-policy global_policy global
+
+end
+write memory
